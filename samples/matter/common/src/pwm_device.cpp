@@ -102,5 +102,6 @@ void PWMDevice::UpdateLight()
 	const uint8_t effectiveLevel =
 		mState == kState_On ? chip::min<uint8_t>(mLevel - mMinLevel, maxEffectiveLevel) : 0;
 
-	pwm_pin_set_usec(mPwmDevice, mPwmChannel, kPwmWidthUs, kPwmWidthUs * effectiveLevel / maxEffectiveLevel, 0);
+	pwm_set(mPwmDevice, mPwmChannel, PWM_USEC(kPwmWidthUs),
+		PWM_USEC(kPwmWidthUs * effectiveLevel / maxEffectiveLevel), 0);
 }
