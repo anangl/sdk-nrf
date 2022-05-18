@@ -14,18 +14,16 @@
 
 LOG_MODULE_DECLARE(app, CONFIG_MATTER_LOG_LEVEL);
 
-int PWMDevice::Init(const device *aPWMDevice, uint32_t aPWMChannel, uint8_t aMinLevel, uint8_t aMaxLevel,
-		    uint8_t aDefaultLevel)
+int PWMDevice::Init(const pwm_dt_spec *aPWMDevice, uint8_t aMinLevel, uint8_t aMaxLevel, uint8_t aDefaultLevel)
 {
 	mState = kState_On;
 	mMinLevel = aMinLevel;
 	mMaxLevel = aMaxLevel;
 	mLevel = aDefaultLevel;
 	mPwmDevice = aPWMDevice;
-	mPwmChannel = aPWMChannel;
 
-	if (!device_is_ready(mPwmDevice)) {
-		LOG_ERR("PWM device %s is not ready", mPwmDevice->name);
+	if (!device_is_ready(mPwmDevice->dev)) {
+		LOG_ERR("PWM device %s is not ready", mPwmDevice->dev->name);
 		return -ENODEV;
 	}
 
@@ -102,6 +100,6 @@ void PWMDevice::UpdateLight()
 	const uint8_t effectiveLevel =
 		mState == kState_On ? chip::min<uint8_t>(mLevel - mMinLevel, maxEffectiveLevel) : 0;
 
-	pwm_set(mPwmDevice, mPwmChannel, PWM_USEC(kPwmWidthUs),
-		PWM_USEC(kPwmWidthUs * effectiveLevel / maxEffectiveLevel), 0);
+	pwm_set(mPwmDevice->dev, mPwmDevice->channel, PWM_USEC(kPwmWidthUs),
+		PWM_USEC(kPwmWidthUs * effectiveLevel / maxEffectiveLevel), mPwmDevice->flags);
 }
